@@ -67,31 +67,6 @@
       text-align: center;
       margin-bottom: 40px;
     }
-    .hero__badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      background: var(--red-glow);
-      border: 1px solid var(--border-red);
-      border-radius: 99px;
-      padding: 5px 14px;
-      font-size: 0.78rem;
-      font-weight: 600;
-      color: var(--red);
-      margin-bottom: 20px;
-      letter-spacing: 0.02em;
-      text-transform: uppercase;
-    }
-    .hero__badge-dot {
-      width: 7px; height: 7px;
-      border-radius: 50%;
-      background: var(--red);
-      animation: blink 1.4s ease-in-out infinite;
-    }
-    @keyframes blink {
-      0%, 100% { opacity: 1; }
-      50%       { opacity: 0.3; }
-    }
     .hero__title {
       font-family: 'Sora', sans-serif;
       font-size: clamp(1.55rem, 4vw, 2.1rem);
@@ -330,7 +305,6 @@
       background: var(--red);
       color: #fff;
       box-shadow: 0 4px 18px rgba(254,6,59,0.28);
-      flex: 1;
     }
     .btn--primary:hover {
       background: var(--red-dark);
@@ -406,7 +380,7 @@
     <div class="navbar__inner">
       <img
         class="navbar__logo"
-        src="https://raw.githubusercontent.com/FullSalesSystem/assets/main/logo-fss.png"
+        src="LOGO-(Azul)---Full-Sales.png"
         alt="Full Sales System"
         onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';"
       />
@@ -421,10 +395,6 @@
 
     <!-- Hero -->
     <header class="hero">
-      <div class="hero__badge">
-        <span class="hero__badge-dot"></span>
-        Formulário de qualificação
-      </div>
       <h1 class="hero__title">Obrigado pelo <span>interesse!</span></h1>
       <p class="hero__sub">
         Nosso time comercial entrará em contato em breve.<br />
@@ -618,8 +588,9 @@
         <button type="button" class="btn btn--ghost btn--hidden" id="btn-back">
           ← Voltar
         </button>
-        <button type="button" class="btn btn--primary" id="btn-next">
-          Próxima pergunta →
+        <!-- shown only on step 2 (checkboxes) -->
+        <button type="button" class="btn btn--primary btn--hidden" id="btn-confirm">
+          Confirmar seleção →
         </button>
       </div>
 
@@ -635,65 +606,14 @@
     (function () {
       const TOTAL = 5;
       let current = 1;
-      let goingBack = false;
 
-      const progressBar  = document.getElementById('progress-bar');
-      const stepLabel    = document.getElementById('step-label');
-      const stepNum      = document.getElementById('step-num');
-      const btnBack      = document.getElementById('btn-back');
-      const btnNext      = document.getElementById('btn-next');
-      const quizNav      = document.getElementById('quiz-nav');
+      const progressBar   = document.getElementById('progress-bar');
+      const stepLabel     = document.getElementById('step-label');
+      const stepNum       = document.getElementById('step-num');
+      const btnBack       = document.getElementById('btn-back');
+      const btnConfirm    = document.getElementById('btn-confirm');
+      const quizNav       = document.getElementById('quiz-nav');
       const successScreen = document.getElementById('success-screen');
-
-      /* ── Option highlight ── */
-      document.querySelectorAll('.option').forEach(function (opt) {
-        const input = opt.querySelector('input');
-
-        if (input.type === 'radio') {
-          input.addEventListener('change', function () {
-            const group = document.querySelectorAll('input[name="' + input.name + '"]');
-            group.forEach(function (r) { r.closest('.option').classList.remove('selected'); });
-            opt.classList.add('selected');
-          });
-        }
-
-        if (input.type === 'checkbox') {
-          input.addEventListener('change', function () {
-            handleCheckboxLogic(input);
-          });
-        }
-      });
-
-      /* ── "Todos acima" logic ── */
-      function handleCheckboxLogic(changed) {
-        if (changed.value === 'todos') {
-          if (changed.checked) {
-            document.querySelectorAll('input[name="q2"]').forEach(function (cb) {
-              if (cb.value !== 'todos') {
-                cb.checked = false;
-                cb.closest('.option').classList.remove('selected');
-              }
-            });
-          }
-        } else {
-          if (changed.checked) {
-            const todos = document.getElementById('todos-acima');
-            todos.checked = false;
-            todos.closest('.option').classList.remove('selected');
-          }
-        }
-        changed.closest('.option').classList.toggle('selected', changed.checked);
-      }
-
-      /* ── Update UI ── */
-      function updateUI() {
-        stepLabel.textContent = 'Pergunta ' + current + ' de ' + TOTAL;
-        stepNum.textContent   = current;
-        progressBar.style.width = ((current / TOTAL) * 100) + '%';
-
-        btnBack.classList.toggle('btn--hidden', current === 1);
-        btnNext.textContent = current === TOTAL ? 'Enviar respostas ✓' : 'Próxima pergunta →';
-      }
 
       /* ── Show step ── */
       function showStep(num, back) {
@@ -704,10 +624,8 @@
           if (i === num) {
             wrapper.style.display = '';
             step.classList.add('active');
-            if (back) step.classList.add('anim-back');
-            else      step.classList.remove('anim-back');
-            /* re-trigger animation */
-            void step.offsetWidth;
+            step.classList.toggle('anim-back', !!back);
+            void step.offsetWidth; /* re-trigger animation */
           } else {
             wrapper.style.display = 'none';
             step.classList.remove('active');
@@ -715,61 +633,92 @@
         }
       }
 
-      /* ── Validation ── */
-      function isStepValid(num) {
-        if (num === 1) return !!document.querySelector('input[name="q1"]:checked');
-        if (num === 2) return !!document.querySelector('input[name="q2"]:checked');
-        if (num === 3) return !!document.querySelector('input[name="q3"]:checked');
-        if (num === 4) return !!document.querySelector('input[name="q4"]:checked');
-        if (num === 5) return !!document.querySelector('input[name="q5"]:checked');
-        return false;
+      /* ── Update UI ── */
+      function updateUI() {
+        stepLabel.textContent       = 'Pergunta ' + current + ' de ' + TOTAL;
+        stepNum.textContent         = current;
+        progressBar.style.width     = ((current / TOTAL) * 100) + '%';
+        btnBack.classList.toggle('btn--hidden', current === 1);
+        /* confirm button only visible on step 2 (checkboxes) */
+        btnConfirm.classList.toggle('btn--hidden', current !== 2);
       }
 
-      /* ── Shake animation ── */
-      function shakeCard() {
-        const card = document.getElementById('quiz-card');
-        card.style.animation = 'none';
-        void card.offsetWidth;
-        card.style.animation = 'shake 0.4s ease';
-      }
-
-      /* ── Collect answers ── */
-      function collectAnswers() {
-        const data = {};
-        data.q1 = (document.querySelector('input[name="q1"]:checked') || {}).value || '';
-        data.q2 = Array.from(document.querySelectorAll('input[name="q2"]:checked')).map(function (c) { return c.value; });
-        data.q3 = (document.querySelector('input[name="q3"]:checked') || {}).value || '';
-        data.q4 = (document.querySelector('input[name="q4"]:checked') || {}).value || '';
-        data.q5 = (document.querySelector('input[name="q5"]:checked') || {}).value || '';
-        return data;
-      }
-
-      /* ── Next ── */
-      btnNext.addEventListener('click', function () {
-        if (!isStepValid(current)) {
-          shakeCard();
-          btnNext.style.animation = 'none';
-          void btnNext.offsetWidth;
-          return;
-        }
-
+      /* ── Advance / submit ── */
+      function advance() {
         if (current < TOTAL) {
           current++;
           showStep(current, false);
           updateUI();
         } else {
-          /* Submit */
-          const answers = collectAnswers();
-          console.log('Quiz answers:', answers);
-          quizNav.style.display = 'none';
-          document.getElementById('step-label').closest('.quiz-card__header').style.display = 'none';
-          progressBar.parentElement.style.display = 'none';
-          for (let i = 1; i <= TOTAL; i++) {
-            const wrapper = document.getElementById('wrapper-' + i) || (i === 1 ? document.querySelector('.steps-wrapper') : null);
-            if (wrapper) wrapper.style.display = 'none';
-          }
-          successScreen.classList.add('active');
+          submitQuiz();
         }
+      }
+
+      /* ── Submit ── */
+      function submitQuiz() {
+        const data = {
+          q1: (document.querySelector('input[name="q1"]:checked') || {}).value || '',
+          q2: Array.from(document.querySelectorAll('input[name="q2"]:checked')).map(function (c) { return c.value; }),
+          q3: (document.querySelector('input[name="q3"]:checked') || {}).value || '',
+          q4: (document.querySelector('input[name="q4"]:checked') || {}).value || '',
+          q5: (document.querySelector('input[name="q5"]:checked') || {}).value || ''
+        };
+        console.log('Quiz answers:', data);
+        quizNav.style.display = 'none';
+        document.getElementById('step-label').closest('.quiz-card__header').style.display = 'none';
+        progressBar.parentElement.style.display = 'none';
+        for (let i = 1; i <= TOTAL; i++) {
+          const wrapper = document.getElementById('wrapper-' + i) || (i === 1 ? document.querySelector('.steps-wrapper') : null);
+          if (wrapper) wrapper.style.display = 'none';
+        }
+        successScreen.classList.add('active');
+      }
+
+      /* ── Radio: auto-advance after short delay ── */
+      document.querySelectorAll('input[type="radio"]').forEach(function (radio) {
+        radio.addEventListener('change', function () {
+          /* highlight selected option */
+          document.querySelectorAll('input[name="' + radio.name + '"]').forEach(function (r) {
+            r.closest('.option, .scale-option').classList.remove('selected');
+          });
+          radio.closest('.option, .scale-option').classList.add('selected');
+
+          /* auto-advance */
+          setTimeout(advance, 380);
+        });
+      });
+
+      /* ── Checkboxes: highlight + show/hide confirm button ── */
+      document.querySelectorAll('input[type="checkbox"]').forEach(function (cb) {
+        cb.addEventListener('change', function () {
+          /* "Todos acima" mutual exclusion */
+          if (cb.value === 'todos' && cb.checked) {
+            document.querySelectorAll('input[name="q2"]').forEach(function (other) {
+              if (other.value !== 'todos') {
+                other.checked = false;
+                other.closest('.option').classList.remove('selected');
+              }
+            });
+          } else if (cb.value !== 'todos' && cb.checked) {
+            const todos = document.getElementById('todos-acima');
+            todos.checked = false;
+            todos.closest('.option').classList.remove('selected');
+          }
+          cb.closest('.option').classList.toggle('selected', cb.checked);
+        });
+      });
+
+      /* ── Confirm button (step 2) ── */
+      btnConfirm.addEventListener('click', function () {
+        if (!document.querySelector('input[name="q2"]:checked')) {
+          /* shake if nothing selected */
+          const card = document.getElementById('quiz-card');
+          card.style.animation = 'none';
+          void card.offsetWidth;
+          card.style.animation = 'shake 0.4s ease';
+          return;
+        }
+        advance();
       });
 
       /* ── Back ── */
