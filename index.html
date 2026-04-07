@@ -656,22 +656,7 @@
 
       /* ── Submit ── */
       function submitQuiz() {
-        const data = {
-          q1: (document.querySelector('input[name="q1"]:checked') || {}).value || '',
-          q2: Array.from(document.querySelectorAll('input[name="q2"]:checked')).map(function (c) { return c.value; }),
-          q3: (document.querySelector('input[name="q3"]:checked') || {}).value || '',
-          q4: (document.querySelector('input[name="q4"]:checked') || {}).value || '',
-          q5: (document.querySelector('input[name="q5"]:checked') || {}).value || ''
-        };
-        console.log('Quiz answers:', data);
-        quizNav.style.display = 'none';
-        document.getElementById('step-label').closest('.quiz-card__header').style.display = 'none';
-        progressBar.parentElement.style.display = 'none';
-        for (let i = 1; i <= TOTAL; i++) {
-          const wrapper = document.getElementById('wrapper-' + i) || (i === 1 ? document.querySelector('.steps-wrapper') : null);
-          if (wrapper) wrapper.style.display = 'none';
-        }
-        successScreen.classList.add('active');
+        window.location.href = 'https://fap01-calendly.vercel.app/';
       }
 
       /* ── Radio: auto-advance after short delay ── */
