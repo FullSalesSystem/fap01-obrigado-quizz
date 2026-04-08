@@ -7,6 +7,13 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Sora:wght@600;700;800&display=swap" rel="stylesheet" />
+  <!-- Google Tag Manager -->
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','GTM-MK7SRXJ9');</script>
+  <!-- End Google Tag Manager -->
   <style>
     /* ─── Reset & Base ─────────────────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -374,6 +381,10 @@
   </style>
 </head>
 <body>
+  <!-- Google Tag Manager (noscript) -->
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MK7SRXJ9"
+  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+  <!-- End Google Tag Manager (noscript) -->
 
   <!-- Navbar -->
   <nav class="navbar" aria-label="Navegação principal">
@@ -617,15 +628,15 @@
 
       /* ── Show step ── */
       function showStep(num, back) {
-        for (let i = 1; i <= TOTAL; i++) {
-          const wrapper = document.getElementById('wrapper-' + i) || (i === 1 ? document.querySelector('.steps-wrapper') : null);
-          const step    = document.getElementById('step-' + i);
+        for (var i = 1; i <= TOTAL; i++) {
+          var wrapper = document.getElementById('wrapper-' + i) || (i === 1 ? document.querySelector('.steps-wrapper') : null);
+          var step    = document.getElementById('step-' + i);
           if (!wrapper || !step) continue;
           if (i === num) {
             wrapper.style.display = '';
             step.classList.add('active');
             step.classList.toggle('anim-back', !!back);
-            void step.offsetWidth; /* re-trigger animation */
+            void step.offsetWidth;
           } else {
             wrapper.style.display = 'none';
             step.classList.remove('active');
@@ -639,7 +650,6 @@
         stepNum.textContent         = current;
         progressBar.style.width     = ((current / TOTAL) * 100) + '%';
         btnBack.classList.toggle('btn--hidden', current === 1);
-        /* confirm button only visible on step 2 (checkboxes) */
         btnConfirm.classList.toggle('btn--hidden', current !== 2);
       }
 
@@ -656,27 +666,27 @@
 
       /* ── Submit ── */
       function submitQuiz() {
-        window.location.href = 'https://fap01-calendly.vercel.app/';
+        if (typeof fbq === 'function') {
+          fbq('trackCustom', 'Lead_qualificado_FAP01');
+          fbq('trackCustom', 'Lead_qualificado_geral');
+        }
+        window.location.href = 'https://fap01-calendly.fullsalessystem.com';
       }
 
       /* ── Radio: auto-advance after short delay ── */
       document.querySelectorAll('input[type="radio"]').forEach(function (radio) {
         radio.addEventListener('change', function () {
-          /* highlight selected option */
           document.querySelectorAll('input[name="' + radio.name + '"]').forEach(function (r) {
             r.closest('.option, .scale-option').classList.remove('selected');
           });
           radio.closest('.option, .scale-option').classList.add('selected');
-
-          /* auto-advance */
           setTimeout(advance, 380);
         });
       });
 
-      /* ── Checkboxes: highlight + show/hide confirm button ── */
+      /* ── Checkboxes: highlight + mutual exclusion ── */
       document.querySelectorAll('input[type="checkbox"]').forEach(function (cb) {
         cb.addEventListener('change', function () {
-          /* "Todos acima" mutual exclusion */
           if (cb.value === 'todos' && cb.checked) {
             document.querySelectorAll('input[name="q2"]').forEach(function (other) {
               if (other.value !== 'todos') {
@@ -685,7 +695,7 @@
               }
             });
           } else if (cb.value !== 'todos' && cb.checked) {
-            const todos = document.getElementById('todos-acima');
+            var todos = document.getElementById('todos-acima');
             todos.checked = false;
             todos.closest('.option').classList.remove('selected');
           }
@@ -696,8 +706,7 @@
       /* ── Confirm button (step 2) ── */
       btnConfirm.addEventListener('click', function () {
         if (!document.querySelector('input[name="q2"]:checked')) {
-          /* shake if nothing selected */
-          const card = document.getElementById('quiz-card');
+          var card = document.getElementById('quiz-card');
           card.style.animation = 'none';
           void card.offsetWidth;
           card.style.animation = 'shake 0.4s ease';
@@ -716,11 +725,10 @@
       });
 
       /* ── Shake keyframe ── */
-      const style = document.createElement('style');
+      var style = document.createElement('style');
       style.textContent = '@keyframes shake { 0%,100%{transform:translateX(0)} 20%,60%{transform:translateX(-6px)} 40%,80%{transform:translateX(6px)} }';
       document.head.appendChild(style);
 
-      /* init */
       updateUI();
     })();
   </script>
