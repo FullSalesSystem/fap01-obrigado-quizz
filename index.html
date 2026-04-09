@@ -318,6 +318,11 @@
       transform: translateY(-2px);
       box-shadow: 0 6px 24px rgba(254,6,59,0.35);
     }
+    .btn--primary:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none;
+    }
     .btn--ghost {
       background: transparent;
       color: var(--muted);
@@ -603,6 +608,10 @@
         <button type="button" class="btn btn--primary btn--hidden" id="btn-confirm">
           Confirmar seleção →
         </button>
+        <!-- shown only on step 5 -->
+        <button type="button" class="btn btn--primary btn--hidden" id="btn-submit">
+          Enviar respostas →
+        </button>
       </div>
 
     </div><!-- /quiz-card -->
@@ -615,16 +624,17 @@
 
   <script>
     (function () {
-      const TOTAL = 5;
-      let current = 1;
+      var TOTAL = 5;
+      var current = 1;
 
-      const progressBar   = document.getElementById('progress-bar');
-      const stepLabel     = document.getElementById('step-label');
-      const stepNum       = document.getElementById('step-num');
-      const btnBack       = document.getElementById('btn-back');
-      const btnConfirm    = document.getElementById('btn-confirm');
-      const quizNav       = document.getElementById('quiz-nav');
-      const successScreen = document.getElementById('success-screen');
+      var progressBar   = document.getElementById('progress-bar');
+      var stepLabel     = document.getElementById('step-label');
+      var stepNum       = document.getElementById('step-num');
+      var btnBack       = document.getElementById('btn-back');
+      var btnConfirm    = document.getElementById('btn-confirm');
+      var btnSubmit     = document.getElementById('btn-submit');
+      var quizNav       = document.getElementById('quiz-nav');
+      var successScreen = document.getElementById('success-screen');
 
       /* ── Show step ── */
       function showStep(num, back) {
@@ -651,17 +661,25 @@
         progressBar.style.width     = ((current / TOTAL) * 100) + '%';
         btnBack.classList.toggle('btn--hidden', current === 1);
         btnConfirm.classList.toggle('btn--hidden', current !== 2);
+        btnSubmit.classList.toggle('btn--hidden', current !== TOTAL);
       }
 
-      /* ── Advance / submit ── */
+      /* ── Advance ── */
       function advance() {
-        if (current < TOTAL) {
-          current++;
-          showStep(current, false);
-          updateUI();
-        } else {
-          submitQuiz();
-        }
+        current++;
+        showStep(current, false);
+        updateUI();
+      }
+
+      /* ── Collect answers ── */
+      function collectAnswers() {
+        return {
+          q1: (document.querySelector('input[name="q1"]:checked') || {}).value || '',
+          q2: Array.from(document.querySelectorAll('input[name="q2"]:checked')).map(function (c) { return c.value; }),
+          q3: (document.querySelector('input[name="q3"]:checked') || {}).value || '',
+          q4: (document.querySelector('input[name="q4"]:checked') || {}).value || '',
+          q5: (document.querySelector('input[name="q5"]:checked') || {}).value || ''
+        };
       }
 
       /* ── Submit ── */
@@ -670,17 +688,39 @@
           fbq('trackCustom', 'Lead_qualificado_FAP01');
           fbq('trackCustom', 'Lead_qualificado_geral');
         }
-        window.location.href = 'https://fap01-calendly.fullsalessystem.com';
+        fetch('https://responsefss.fullsalessystem.com.br/webhook/DESENVRESPS', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(collectAnswers())
+        }).finally(function () {
+          window.location.href = 'https://fap01-calendly.fullsalessystem.com';
+        });
       }
 
-      /* ── Radio: auto-advance after short delay ── */
+      /* ── Submit button (step 5) ── */
+      btnSubmit.addEventListener('click', function () {
+        if (!document.querySelector('input[name="q5"]:checked')) {
+          var card = document.getElementById('quiz-card');
+          card.style.animation = 'none';
+          void card.offsetWidth;
+          card.style.animation = 'shake 0.4s ease';
+          return;
+        }
+        btnSubmit.disabled = true;
+        btnSubmit.textContent = 'Enviando...';
+        submitQuiz();
+      });
+
+      /* ── Radio: auto-advance after short delay (not on last step) ── */
       document.querySelectorAll('input[type="radio"]').forEach(function (radio) {
         radio.addEventListener('change', function () {
           document.querySelectorAll('input[name="' + radio.name + '"]').forEach(function (r) {
             r.closest('.option, .scale-option').classList.remove('selected');
           });
           radio.closest('.option, .scale-option').classList.add('selected');
-          setTimeout(advance, 380);
+          if (current < TOTAL) {
+            setTimeout(advance, 380);
+          }
         });
       });
 
