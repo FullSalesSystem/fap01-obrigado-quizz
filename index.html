@@ -636,6 +636,9 @@
       var quizNav       = document.getElementById('quiz-nav');
       var successScreen = document.getElementById('success-screen');
 
+      /* ── URL params — user data from the signup form ── */
+      var urlParams = new URLSearchParams(window.location.search);
+
       /* ── Show step ── */
       function showStep(num, back) {
         for (var i = 1; i <= TOTAL; i++) {
@@ -674,6 +677,14 @@
       /* ── Collect answers ── */
       function collectAnswers() {
         return {
+          /* user data from URL */
+          nome:     urlParams.get('nome')     || '',
+          email:    urlParams.get('email')    || '',
+          whatsapp: urlParams.get('whatsapp') || '',
+          cargo:    urlParams.get('cargo')    || '',
+          segmento: urlParams.get('segmento') || '',
+          receita:  urlParams.get('receita')  || '',
+          /* quiz answers */
           q1: (document.querySelector('input[name="q1"]:checked') || {}).value || '',
           q2: Array.from(document.querySelectorAll('input[name="q2"]:checked')).map(function (c) { return c.value; }),
           q3: (document.querySelector('input[name="q3"]:checked') || {}).value || '',
