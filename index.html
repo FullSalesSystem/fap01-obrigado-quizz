@@ -45,9 +45,9 @@
     /* ─── Navbar ────────────────────────────────────────────── */
     .navbar {
       width: 100%;
-      background: rgba(255,255,255,0.92);
+      background: rgba(10, 25, 41, 0.92);
       backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
       position: sticky;
       top: 0;
       z-index: 100;
@@ -95,15 +95,15 @@
 
     /* ─── Quiz card ─────────────────────────────────────────── */
     .quiz-card {
-      background: var(--card);
-      border: 1px solid var(--border);
+      background: #55556a;
+      border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 20px;
       overflow: hidden;
-      box-shadow: 0 4px 32px rgba(0,0,0,0.06);
+      box-shadow: 0 4px 32px rgba(0,0,0,0.25);
     }
     .quiz-card__bar {
       height: 4px;
-      background: #ececf2;
+      background: rgba(255, 255, 255, 0.15);
       position: relative;
     }
     .quiz-card__bar-fill {
@@ -121,17 +121,17 @@
     .quiz-step-label {
       font-size: 0.78rem;
       font-weight: 600;
-      color: var(--muted);
+      color: rgba(255, 255, 255, 0.75);
       letter-spacing: 0.05em;
       text-transform: uppercase;
     }
     .quiz-step-counter {
       font-size: 0.78rem;
       font-weight: 600;
-      color: var(--muted);
+      color: rgba(255, 255, 255, 0.75);
     }
     .quiz-step-counter em {
-      color: var(--red);
+      color: #ff4d6d;
       font-style: normal;
       font-weight: 700;
     }
@@ -161,7 +161,7 @@
       font-family: 'Sora', sans-serif;
       font-size: clamp(1rem, 2.5vw, 1.2rem);
       font-weight: 700;
-      color: var(--text);
+      color: #ffffff;
       margin-bottom: 22px;
       line-height: 1.4;
     }
@@ -174,23 +174,23 @@
       align-items: center;
       gap: 12px;
       padding: 13px 16px;
-      border: 1.5px solid var(--border);
+      border: 1.5px solid rgba(255, 255, 255, 0.15);
       border-radius: 11px;
       cursor: pointer;
       transition: border-color 0.18s, background 0.18s, box-shadow 0.18s;
       user-select: none;
-      background: #fafafc;
+      background: rgba(255, 255, 255, 0.06);
     }
     .option:hover {
       border-color: var(--border-red);
-      background: var(--red-glow);
+      background: rgba(254, 6, 59, 0.12);
     }
     .option input[type="radio"],
     .option input[type="checkbox"] {
       appearance: none;
       -webkit-appearance: none;
       width: 18px; height: 18px;
-      border: 2px solid #ccccd8;
+      border: 2px solid rgba(255, 255, 255, 0.45);
       border-radius: 50%;
       flex-shrink: 0;
       transition: border-color 0.18s, background 0.18s;
@@ -225,13 +225,13 @@
     }
     .option.selected {
       border-color: var(--border-red);
-      background: var(--red-glow);
-      box-shadow: 0 0 0 3px rgba(254,6,59,0.07);
+      background: rgba(254, 6, 59, 0.15);
+      box-shadow: 0 0 0 3px rgba(254,6,59,0.12);
     }
     .option__label {
       font-size: 0.93rem;
       font-weight: 500;
-      color: var(--text);
+      color: #ffffff;
       line-height: 1.4;
     }
 
@@ -245,7 +245,7 @@
       display: flex;
       justify-content: space-between;
       font-size: 0.75rem;
-      color: var(--muted);
+      color: rgba(255, 255, 255, 0.75);
       font-weight: 500;
       padding: 0 2px;
     }
@@ -267,23 +267,23 @@
       aspect-ratio: 1;
       max-width: 70px;
       border-radius: 12px;
-      border: 1.5px solid var(--border);
-      background: #fafafc;
+      border: 1.5px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.06);
       display: flex;
       align-items: center;
       justify-content: center;
       font-family: 'Sora', sans-serif;
       font-size: 1.15rem;
       font-weight: 700;
-      color: var(--muted);
+      color: rgba(255, 255, 255, 0.85);
       transition: border-color 0.18s, background 0.18s, color 0.18s, box-shadow 0.18s;
     }
     .scale-option:hover .scale-btn,
     .scale-option input:checked ~ .scale-btn {
       border-color: var(--red);
-      background: var(--red-glow);
-      color: var(--red);
-      box-shadow: 0 0 0 3px rgba(254,6,59,0.07);
+      background: rgba(254, 6, 59, 0.18);
+      color: #ffffff;
+      box-shadow: 0 0 0 3px rgba(254,6,59,0.18);
     }
 
     /* ─── Navigation buttons ────────────────────────────────── */
@@ -327,12 +327,12 @@
     }
     .btn--ghost {
       background: transparent;
-      color: var(--muted);
-      border: 1.5px solid var(--border);
+      color: rgba(255, 255, 255, 0.8);
+      border: 1.5px solid rgba(255, 255, 255, 0.25);
     }
     .btn--ghost:hover {
-      border-color: #aaaabc;
-      color: var(--text);
+      border-color: rgba(255, 255, 255, 0.55);
+      color: #ffffff;
     }
     .btn--hidden { visibility: hidden; pointer-events: none; }
 
@@ -346,7 +346,7 @@
     .success.active { display: block; }
     .success__icon {
       width: 64px; height: 64px;
-      background: var(--red-glow);
+      background: rgba(254, 6, 59, 0.18);
       border: 2px solid var(--border-red);
       border-radius: 50%;
       display: flex;
@@ -354,16 +354,17 @@
       justify-content: center;
       margin: 0 auto 20px;
     }
-    .success__icon svg { width: 28px; height: 28px; color: var(--red); }
+    .success__icon svg { width: 28px; height: 28px; color: #ff4d6d; }
     .success__title {
       font-family: 'Sora', sans-serif;
       font-size: clamp(1.2rem, 3vw, 1.5rem);
       font-weight: 800;
+      color: #ffffff;
       margin-bottom: 12px;
     }
     .success__sub {
       font-size: 0.95rem;
-      color: var(--muted);
+      color: rgba(255, 255, 255, 0.85);
       line-height: 1.6;
     }
 
@@ -398,11 +399,11 @@
     <div class="navbar__inner">
       <img
         class="navbar__logo"
-        src="LOGO-(Azul)---Full-Sales.png"
+        src="LOGO-(Branco)---Full-Sales.png"
         alt="Full Sales System"
         onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';"
       />
-      <span style="display:none; font-family:'Sora',sans-serif; font-weight:800; font-size:1.05rem; color:#111118;">
+      <span style="display:none; font-family:'Sora',sans-serif; font-weight:800; font-size:1.05rem; color:#ffffff;">
         Full Sales <span style="color:#FE063B;">System</span>
       </span>
     </div>
