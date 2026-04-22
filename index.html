@@ -722,10 +722,6 @@
 
       /* ── Submit ── */
       function submitQuiz() {
-        if (typeof fbq === 'function') {
-          fbq('trackCustom', 'Lead_qualificado_FAP01');
-          fbq('trackCustom', 'Lead_qualificado_geral');
-        }
         fetch('https://responsefss.fullsalessystem.com.br/webhook/DESENVRESPS', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
