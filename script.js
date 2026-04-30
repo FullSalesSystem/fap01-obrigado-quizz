@@ -68,14 +68,55 @@
     };
   }
 
-  /* ── Submit ── */
-  function submitQuiz() {
-    fetch('https://responsefss.fullsalessystem.com.br/webhook/DESENVRESPS', {
+  /* ── Submit with timeout + retry ── */
+  var WEBHOOK_URL = 'https://responsefss.fullsalessystem.com.br/webhook/DESENVRESPS';
+  var REDIRECT_URL = 'https://fap01-calendly.fullsalessystem.com';
+  var REQUEST_TIMEOUT_MS = 8000;
+  var MAX_ATTEMPTS = 2;
+
+  function postOnce(url, payload) {
+    var ctrl = ('AbortController' in window) ? new AbortController() : null;
+    var timer = ctrl ? setTimeout(function () { ctrl.abort(); }, REQUEST_TIMEOUT_MS) : null;
+    var opts = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(collectAnswers())
-    }).finally(function () {
-      window.location.href = 'https://fap01-calendly.fullsalessystem.com';
+      body: JSON.stringify(payload)
+    };
+    if (ctrl) opts.signal = ctrl.signal;
+    return fetch(url, opts).then(function (res) {
+      if (timer) clearTimeout(timer);
+      if (!res.ok) throw new Error('http_' + res.status);
+      return true;
+    }).catch(function (err) {
+      if (timer) clearTimeout(timer);
+      throw err;
+    });
+  }
+
+  function postWithRetry(url, payload, attempts) {
+    function tryOnce(n) {
+      return postOnce(url, payload).catch(function () {
+        if (n + 1 < attempts) return tryOnce(n + 1);
+        return false;
+      });
+    }
+    return tryOnce(0);
+  }
+
+  function submitQuiz() {
+    var payload = collectAnswers();
+    postWithRetry(WEBHOOK_URL, payload, MAX_ATTEMPTS).then(function (ok) {
+      if (!ok) {
+        /* Persist locally so the lead is not silently lost; a future
+           page or session can attempt re-send. Errors here are non-fatal. */
+        try { localStorage.setItem('quiz_pending_submission', JSON.stringify({
+          payload: payload,
+          ts: Date.now()
+        })); } catch (e) { /* storage may be unavailable / full */ }
+      } else {
+        try { localStorage.removeItem('quiz_pending_submission'); } catch (e) {}
+      }
+      window.location.href = REDIRECT_URL;
     });
   }
 
