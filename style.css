@@ -44,6 +44,13 @@ body {
   align-items: center;
 }
 .navbar__logo { height: 36px; }
+.navbar__fallback {
+  font-family: 'Sora', sans-serif;
+  font-weight: 800;
+  font-size: 1.05rem;
+  color: #ffffff;
+}
+.navbar__fallback-accent { color: #FE063B; }
 
 /* ─── Page wrapper ──────────────────────────────────────── */
 .page {
@@ -92,6 +99,7 @@ body {
   position: relative;
 }
 .quiz-card__bar-fill {
+  width: 20%;
   height: 100%;
   background: var(--red);
   border-radius: 0 4px 4px 0;
@@ -371,3 +379,12 @@ body {
   .quiz-nav { padding-left: 20px; padding-right: 20px; }
   .scale-btn { font-size: 1rem; border-radius: 9px; }
 }
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-6px); }
+  40%, 80% { transform: translateX(6px); }
+}
+
+.is-hidden { display: none !important; }
+.is-inline { display: inline !important; }

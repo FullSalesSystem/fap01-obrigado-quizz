@@ -48,14 +48,14 @@
   <nav class="navbar" aria-label="Navegação principal">
     <div class="navbar__inner">
       <img
+        id="navbar-logo"
         class="navbar__logo"
         src="assets/LOGO-(Branco)---Full-Sales.png"
         alt="Full Sales System"
         loading="lazy"
-        onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';"
       />
-      <span style="display:none; font-family:'Sora',sans-serif; font-weight:800; font-size:1.05rem; color:#ffffff;">
-        Full Sales <span style="color:#FE063B;">System</span>
+      <span id="navbar-logo-fallback" class="navbar__fallback is-hidden">
+        Full Sales <span class="navbar__fallback-accent">System</span>
       </span>
     </div>
   </nav>
@@ -78,7 +78,7 @@
 
       <!-- Progress bar -->
       <div class="quiz-card__bar">
-        <div class="quiz-card__bar-fill" id="progress-bar" style="width: 20%"></div>
+        <div class="quiz-card__bar-fill" id="progress-bar"></div>
       </div>
 
       <!-- Header -->

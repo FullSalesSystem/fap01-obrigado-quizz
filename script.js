@@ -146,10 +146,15 @@
     }
   });
 
-  /* ── Shake keyframe ── */
-  var style = document.createElement('style');
-  style.textContent = '@keyframes shake { 0%,100%{transform:translateX(0)} 20%,60%{transform:translateX(-6px)} 40%,80%{transform:translateX(6px)} }';
-  document.head.appendChild(style);
+  /* ── Logo fallback (replaces inline onerror=) ── */
+  var navLogo = document.getElementById('navbar-logo');
+  var navLogoFallback = document.getElementById('navbar-logo-fallback');
+  if (navLogo && navLogoFallback) {
+    navLogo.addEventListener('error', function () {
+      navLogo.classList.add('is-hidden');
+      navLogoFallback.classList.remove('is-hidden');
+    });
+  }
 
   updateUI();
 })();
