@@ -12,49 +12,81 @@
   var successScreen = document.getElementById('success-screen');
 
   /* ── Lead data from previous page ──
-     Preferred channel: sessionStorage key 'lead_data' (set by signup
-     page on the same origin). Fallback: querystring, kept only for
-     backwards compatibility while the previous page is migrated.
-     Either way, after reading we strip the data from URL and storage
-     to avoid PII lingering in history, Referer headers, and shared
-     storage. */
+     Channels (in order of preference):
+       1. Cookie 'lead_data' on .fullsalessystem.com — works across
+          subdomains (fap01 → fap01-obrigado-quizz).
+       2. sessionStorage 'lead_data' — for same-origin signup flows.
+       3. Querystring — legacy fallback while the previous page is
+          migrated; the URL is stripped after read so PII does not
+          leak via Referer to fonts/GTM/Meta. */
   var LEAD_FIELDS = ['nome', 'email', 'whatsapp', 'cargo', 'segmento', 'receita'];
+  var LEAD_COOKIE_DOMAIN = '.fullsalessystem.com';
+
+  function pickFields(obj) {
+    var out = {};
+    for (var i = 0; i < LEAD_FIELDS.length; i++) {
+      var k = LEAD_FIELDS[i];
+      out[k] = (obj && typeof obj[k] === 'string') ? obj[k] : '';
+    }
+    return out;
+  }
+
+  function readCookie(name) {
+    var parts = document.cookie ? document.cookie.split(';') : [];
+    var prefix = name + '=';
+    for (var i = 0; i < parts.length; i++) {
+      var c = parts[i].replace(/^\s+/, '');
+      if (c.indexOf(prefix) === 0) return c.substring(prefix.length);
+    }
+    return null;
+  }
+
+  function clearLeadCookie() {
+    /* Must match Domain/Path used when set, otherwise clear is silent no-op. */
+    document.cookie = 'lead_data=; Domain=' + LEAD_COOKIE_DOMAIN +
+      '; Path=/; Max-Age=0; SameSite=Strict; Secure';
+  }
 
   function readLeadData() {
-    var data = {};
-    var i;
+    var raw, parsed;
 
-    /* 1. sessionStorage */
+    /* 1. Cookie (cross-subdomain) */
     try {
-      var raw = sessionStorage.getItem('lead_data');
+      raw = readCookie('lead_data');
       if (raw) {
-        var parsed = JSON.parse(raw);
+        parsed = JSON.parse(decodeURIComponent(raw));
         if (parsed && typeof parsed === 'object') {
-          for (i = 0; i < LEAD_FIELDS.length; i++) {
-            var k = LEAD_FIELDS[i];
-            if (typeof parsed[k] === 'string') data[k] = parsed[k];
-          }
-          sessionStorage.removeItem('lead_data');
-          return data;
+          clearLeadCookie();
+          return pickFields(parsed);
         }
       }
-    } catch (e) { /* storage unavailable or malformed JSON, fall through */ }
+    } catch (e) { /* malformed cookie — fall through */ }
 
-    /* 2. fallback: querystring */
+    /* 2. sessionStorage (same-origin) */
+    try {
+      raw = sessionStorage.getItem('lead_data');
+      if (raw) {
+        parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object') {
+          sessionStorage.removeItem('lead_data');
+          return pickFields(parsed);
+        }
+      }
+    } catch (e) { /* storage unavailable */ }
+
+    /* 3. Legacy: querystring */
     var p = new URLSearchParams(window.location.search);
-    for (i = 0; i < LEAD_FIELDS.length; i++) {
-      data[LEAD_FIELDS[i]] = p.get(LEAD_FIELDS[i]) || '';
+    var fromQuery = {};
+    for (var i = 0; i < LEAD_FIELDS.length; i++) {
+      fromQuery[LEAD_FIELDS[i]] = p.get(LEAD_FIELDS[i]) || '';
     }
-
-    /* Strip the querystring so PII does not leak via Referer headers
-       to fonts.googleapis.com / GTM / Meta resources loaded later. */
     if (window.history && typeof window.history.replaceState === 'function') {
       try {
-        window.history.replaceState({}, document.title, window.location.pathname + window.location.hash);
+        window.history.replaceState({}, document.title,
+          window.location.pathname + window.location.hash);
       } catch (e) { /* non-fatal */ }
     }
-
-    return data;
+    return fromQuery;
   }
 
   var leadData = readLeadData();
