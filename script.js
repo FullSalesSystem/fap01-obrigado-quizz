@@ -11,8 +11,53 @@
   var quizNav       = document.getElementById('quiz-nav');
   var successScreen = document.getElementById('success-screen');
 
-  /* ── URL params — user data from the signup form ── */
-  var urlParams = new URLSearchParams(window.location.search);
+  /* ── Lead data from previous page ──
+     Preferred channel: sessionStorage key 'lead_data' (set by signup
+     page on the same origin). Fallback: querystring, kept only for
+     backwards compatibility while the previous page is migrated.
+     Either way, after reading we strip the data from URL and storage
+     to avoid PII lingering in history, Referer headers, and shared
+     storage. */
+  var LEAD_FIELDS = ['nome', 'email', 'whatsapp', 'cargo', 'segmento', 'receita'];
+
+  function readLeadData() {
+    var data = {};
+    var i;
+
+    /* 1. sessionStorage */
+    try {
+      var raw = sessionStorage.getItem('lead_data');
+      if (raw) {
+        var parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object') {
+          for (i = 0; i < LEAD_FIELDS.length; i++) {
+            var k = LEAD_FIELDS[i];
+            if (typeof parsed[k] === 'string') data[k] = parsed[k];
+          }
+          sessionStorage.removeItem('lead_data');
+          return data;
+        }
+      }
+    } catch (e) { /* storage unavailable or malformed JSON, fall through */ }
+
+    /* 2. fallback: querystring */
+    var p = new URLSearchParams(window.location.search);
+    for (i = 0; i < LEAD_FIELDS.length; i++) {
+      data[LEAD_FIELDS[i]] = p.get(LEAD_FIELDS[i]) || '';
+    }
+
+    /* Strip the querystring so PII does not leak via Referer headers
+       to fonts.googleapis.com / GTM / Meta resources loaded later. */
+    if (window.history && typeof window.history.replaceState === 'function') {
+      try {
+        window.history.replaceState({}, document.title, window.location.pathname + window.location.hash);
+      } catch (e) { /* non-fatal */ }
+    }
+
+    return data;
+  }
+
+  var leadData = readLeadData();
 
   /* ── Show step ── */
   function showStep(num, back) {
@@ -52,14 +97,12 @@
   /* ── Collect answers ── */
   function collectAnswers() {
     return {
-      /* user data from URL */
-      nome:     urlParams.get('nome')     || '',
-      email:    urlParams.get('email')    || '',
-      whatsapp: urlParams.get('whatsapp') || '',
-      cargo:    urlParams.get('cargo')    || '',
-      segmento: urlParams.get('segmento') || '',
-      receita:  urlParams.get('receita')  || '',
-      /* quiz answers */
+      nome:     leadData.nome     || '',
+      email:    leadData.email    || '',
+      whatsapp: leadData.whatsapp || '',
+      cargo:    leadData.cargo    || '',
+      segmento: leadData.segmento || '',
+      receita:  leadData.receita  || '',
       q1: (document.querySelector('input[name="q1"]:checked') || {}).value || '',
       q2: Array.from(document.querySelectorAll('input[name="q2"]:checked')).map(function (c) { return c.value; }),
       q3: (document.querySelector('input[name="q3"]:checked') || {}).value || '',
